@@ -1,0 +1,191 @@
+package com.example.ea2lucianopulido;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+public class ConexionHttpUrlConexion {
+
+    private HttpURLConnection peticion;
+    private URL link;
+    private JSONObject paquete;
+    private JSONObject paqueteRecibido;
+    private DataOutputStream datosSalida;
+    private String url;
+    private int respuestaServidor;
+    private String headerJsonTipo;
+    private String headerAuthorizationTipo;
+    private String headerJsonDescripcion;
+    private String headerAuthorizationDescripcion;
+    private String token ;
+    private String token_refresh;
+
+
+    public ConexionHttpUrlConexion(String url, JSONObject paquete, String headerJsonTipo, String headerJsonDescripcion) {
+        this.paquete = paquete;
+        this.url = url;
+        this.headerJsonTipo = headerJsonTipo;
+        this.headerJsonDescripcion = headerJsonDescripcion;
+
+        try {
+            link = new URL(this.url);
+            peticion = (HttpURLConnection) link.openConnection(); // abro una conexion
+            peticion.setDoInput(true);
+            peticion.setDoOutput(true);
+            peticion.setRequestMethod("POST");// seteo el tipo de peticion
+            peticion.setRequestProperty(this.headerJsonTipo, this.headerJsonDescripcion); // configuro el header
+            datosSalida = new DataOutputStream(peticion.getOutputStream());
+            datosSalida.writeBytes(this.paquete.toString());
+
+            peticion.connect();// envio la consulta
+            respuestaServidor = peticion.getResponseCode(); // obtengo la respuesta
+            analizarRespuestaServidor(respuestaServidor,peticion);
+            datosSalida.flush();
+            datosSalida.close();
+
+        }catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }finally {
+            peticion.disconnect();
+        }
+    }
+
+    public ConexionHttpUrlConexion(String url, JSONObject paquete , String headerJsonTipo, String headerJsonDescripcion,String headerAuthorizationTipo, String headerAuthorizationDescripcion) {
+        this.paquete = paquete;
+        this.url = url;
+        this.headerJsonTipo = headerJsonTipo;
+        this.headerJsonDescripcion = headerJsonDescripcion;
+        this.headerAuthorizationTipo = headerAuthorizationTipo;
+        this.headerAuthorizationDescripcion = headerAuthorizationDescripcion;
+
+
+        try {
+            link = new URL(this.url);
+            peticion = (HttpURLConnection) link.openConnection(); // abro una conexion
+            peticion.setDoInput(true);
+            peticion.setDoOutput(true);
+            peticion.setRequestMethod("POST");// seteo el tipo de peticion
+            peticion.setRequestProperty(this.headerJsonTipo, this.headerJsonDescripcion); // configuro el header
+            peticion.setRequestProperty(this.headerAuthorizationTipo,this.headerAuthorizationDescripcion);
+            datosSalida = new DataOutputStream(peticion.getOutputStream());
+            datosSalida.writeBytes(this.paquete.toString());
+
+            peticion.connect();// envio la consulta
+            respuestaServidor = peticion.getResponseCode(); // obtengo la respuesta
+            analizarRespuestaServidor(respuestaServidor,peticion); // identifico y seteo el tipo de respuesta
+
+            datosSalida.flush();
+            datosSalida.close();
+
+        }catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }finally {
+            peticion.disconnect();
+        }
+    }
+
+
+
+    public ConexionHttpUrlConexion(String url, String headerJsonTipo, String headerJsonDescripcion,String headerAuthorizationTipo, String headerAuthorizationDescripcion)
+    {
+        this.url = url;
+        this.headerJsonTipo = headerJsonTipo;
+        this.headerJsonDescripcion = headerJsonDescripcion;
+        this.headerAuthorizationTipo = headerAuthorizationTipo;
+        this.headerAuthorizationDescripcion = headerAuthorizationDescripcion;
+
+        try {
+            link = new URL(this.url);
+            peticion = (HttpURLConnection) link.openConnection(); // abro una conexion
+            peticion.setDoInput(true);
+            peticion.setDoOutput(true);
+            peticion.setRequestMethod("PUT");// seteo el tipo de peticion
+            peticion.setRequestProperty(this.headerJsonTipo, this.headerJsonDescripcion); // configuro el header
+            peticion.setRequestProperty(this.headerAuthorizationTipo,this.headerAuthorizationDescripcion);
+
+            peticion.connect();// envio la consulta
+            respuestaServidor = peticion.getResponseCode(); // obtengo la respuesta
+            analizarRespuestaServidor(respuestaServidor,peticion); // identifico y seteo el tipo de respuesta
+
+        }catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }finally {
+            peticion.disconnect();
+        }
+    }
+    private void convertInputToString(InputStreamReader inputStream) throws IOException, JSONException {
+
+        BufferedReader leer = new BufferedReader(inputStream);
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while( (line = leer.readLine()) != null)
+        {
+            sb.append(line);
+
+        }
+        leer.close();
+        System.out.println(sb.toString());
+        paqueteRecibido = new JSONObject(sb.toString());
+    }
+
+    private void analizarRespuestaServidor(int respuestaServidor , HttpURLConnection peticion) throws IOException, JSONException {
+
+
+        if(respuestaServidor == HttpURLConnection.HTTP_OK)
+        {
+            convertInputToString(new InputStreamReader(peticion.getInputStream()));
+            setToken(getPaqueteRecibido().getString("token"));
+            setToken(getPaqueteRecibido().getString("token_refresh"));
+            setRespuestaServidor(respuestaServidor);
+        }
+        if(respuestaServidor == HttpURLConnection.HTTP_CREATED)
+        {
+            convertInputToString(new InputStreamReader(peticion.getInputStream()));
+            setRespuestaServidor(respuestaServidor);
+        }
+        if(respuestaServidor == HttpURLConnection.HTTP_BAD_REQUEST)
+        {
+            convertInputToString(new InputStreamReader(peticion.getErrorStream()));
+            setRespuestaServidor(respuestaServidor);
+        }
+
+    }
+
+    public int getRespuestaServidor() {
+        return respuestaServidor;
+    }
+
+    public void setRespuestaServidor(int respuestaServidor)
+    {
+        this.respuestaServidor = respuestaServidor;
+    }
+
+    public HttpURLConnection getPeticion() {
+        return peticion;
+    }
+
+    public JSONObject getPaqueteRecibido() {
+        return paqueteRecibido;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getToken_refresh() {
+        return token_refresh;
+    }
+
+    public void setToken_refresh(String token_refresh) {
+        this.token_refresh = token_refresh;
+    }
+}
