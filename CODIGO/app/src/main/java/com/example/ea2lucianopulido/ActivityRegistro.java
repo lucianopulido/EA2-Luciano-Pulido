@@ -49,12 +49,6 @@ public class ActivityRegistro extends AppCompatActivity
     private NetworkInfo informacionConexion;
     private TextView estadoConexion;
     private Intent intent;
-    private Intent estadoBateria;
-    private IntentFilter intentFiltro;
-    private int nivelBateria;
-    private int escalaBateria;
-    private float porcentajeBateria;
-    private TextView textFieldPorcentajeBateria;
     private Drawable colorBordeRegistro;
     private String urlRegistro;
     private String urlEvento;
@@ -89,7 +83,6 @@ public class ActivityRegistro extends AppCompatActivity
         email = (EditText) findViewById(R.id.inputEmail);
         password = (EditText) findViewById(R.id.inputPassword);
         comision = (EditText) findViewById(R.id.inputComision);
-        textFieldPorcentajeBateria = (TextView) findViewById(R.id.textFieldBateria);
 
         colorBordeRegistro = email.getBackground();
         colorBordeRegistro.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
@@ -102,7 +95,7 @@ public class ActivityRegistro extends AppCompatActivity
 
 
         verificarConexion(); // verifico si estoy conectado a internet
-        verificarEstadoCargaBateria();
+
 
         paqueteRegistro = new JSONObject();// creo objeto JSON para parsear la informacion que envio o recibo
         paqueteEvento = new JSONObject();
@@ -177,16 +170,7 @@ public class ActivityRegistro extends AppCompatActivity
 
     }
 
-    private void verificarEstadoCargaBateria()
-    {
-        intentFiltro = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        estadoBateria = registerReceiver(null,intentFiltro);
-        nivelBateria = estadoBateria.getIntExtra(BatteryManager.EXTRA_LEVEL,-1);
-        escalaBateria = estadoBateria.getIntExtra(BatteryManager.EXTRA_SCALE,-1);
-        porcentajeBateria = nivelBateria * 100 / (float)escalaBateria;
-        textFieldPorcentajeBateria.setText("bateria: %"+Float.toString(porcentajeBateria));
 
-    }
 
 
     private Handler manejadorMensajesHiloPrincipal()

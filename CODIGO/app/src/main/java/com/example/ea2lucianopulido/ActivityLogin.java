@@ -6,12 +6,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -61,6 +63,12 @@ public class ActivityLogin extends AppCompatActivity{
     private String token;
     private String token_refresh;
     private boolean estadoConexionInternet;
+    private Intent estadoBateria;
+    private IntentFilter intentFiltro;
+    private int nivelBateria;
+    private int escalaBateria;
+    private float porcentajeBateria;
+    private TextView vistaBateria;
 
 
 
@@ -75,7 +83,7 @@ public class ActivityLogin extends AppCompatActivity{
          passwordLogin  = (EditText) findViewById(R.id.inputPasswordLogin);
          iniciarSesion = (Button) findViewById(R.id.botonIniciarSesion);
          crearCuenta = (Button) findViewById(R.id.boton_crear_cuenta);
-
+         vistaBateria = (TextView)findViewById(R.id.textViewBateria);
          colorBordeLogin = emailLogin.getBackground();
          colorBordeLogin.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
          emailLogin.setBackground(colorBordeLogin);
@@ -84,6 +92,7 @@ public class ActivityLogin extends AppCompatActivity{
          Log.i("Eject","Eject onCreate Login");
 
          verificarConexion();
+         verificarEstadoCargaBateria();
 
          paquete =  new JSONObject();
          paqueteEvento = new JSONObject();
@@ -115,6 +124,17 @@ public class ActivityLogin extends AppCompatActivity{
             estadoConexionLogin.setText("estado de conexion: sin conexion");
             estadoConexionInternet = false;
         }
+
+    }
+
+    private void verificarEstadoCargaBateria()
+    {
+        intentFiltro = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        estadoBateria = registerReceiver(null,intentFiltro);
+        nivelBateria = estadoBateria.getIntExtra(BatteryManager.EXTRA_LEVEL,-1);
+        escalaBateria = estadoBateria.getIntExtra(BatteryManager.EXTRA_SCALE,-1);
+        porcentajeBateria = nivelBateria * 100 / (float)escalaBateria;
+        vistaBateria.setText("bateria: %"+Float.toString(porcentajeBateria));
 
     }
 
