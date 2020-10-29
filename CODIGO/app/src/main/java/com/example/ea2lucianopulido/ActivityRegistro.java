@@ -103,6 +103,9 @@ public class ActivityRegistro extends AppCompatActivity
         else
         {
             estadoConexion.setText("conexion no establecida");
+            Toast mensajeSinInternet = Toast.makeText(ActivityRegistro.this,"Su dispositivo movil no esta conectado a internet. Debe conectar su dispositivo a internet para que la aplicacion funcione correctamente",Toast.LENGTH_LONG);
+            mensajeSinInternet.setGravity(Gravity.CENTER,0,0);
+            mensajeSinInternet.show();
         }
 
         paqueteRegistro = new JSONObject();// creo objeto JSON para parsear la informacion que envio o recibo
