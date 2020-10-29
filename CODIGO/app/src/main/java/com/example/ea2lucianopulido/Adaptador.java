@@ -21,7 +21,7 @@ public  class Adaptador extends  RecyclerView.Adapter<Adaptador.ViewHolder>
     LayoutInflater inflador;
 
     public Adaptador(Context contexto, ArrayList<String> tipoEvento, ArrayList<String> descripcionEvento, ArrayList<String> dni,ArrayList<String> idEvento) {
-        this.idEvento = idEvento;
+        this.idEvento = new ArrayList<String>();
         this.tipoEvento = new ArrayList<String>();
         this.descripcionEvento = new ArrayList<String>();
         this.dni = new ArrayList<String>();

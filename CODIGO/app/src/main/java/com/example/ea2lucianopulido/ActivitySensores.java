@@ -238,7 +238,7 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
                             try {
                                 sensorEstimulado = false;
                                 paqueteEvento.put("env", "PROD");
-                                paqueteEvento.put("type_events", "sensor");
+                                paqueteEvento.put("type_events", "sensor estimulado");
                                 paqueteEvento.put("description", "sensor proximidad");
 
                                 urlEvento = "http://so-unlam.net.ar/api/api/event";

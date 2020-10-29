@@ -12,7 +12,7 @@
         android:id="@+id/botonIniciarSesion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="REGISTRARSE"
+        android:text="INICIAR SESIÓN"
         android:textColor="#FFFFFF"
         app:backgroundTint="#455ACF"
         app:layout_constraintBottom_toBottomOf="parent"
