@@ -45,8 +45,6 @@ public class ActivityRegistro extends AppCompatActivity
     private EditText password;
     private JSONObject paqueteRegistro;
     private JSONObject paqueteEvento;
-    private ConnectivityManager conexion;
-    private NetworkInfo informacionConexion;
     private TextView estadoConexion;
     private Intent intent;
     private Drawable colorBordeRegistro;
@@ -83,6 +81,8 @@ public class ActivityRegistro extends AppCompatActivity
         email = (EditText) findViewById(R.id.inputEmail);
         password = (EditText) findViewById(R.id.inputPassword);
         comision = (EditText) findViewById(R.id.inputComision);
+        estadoConexion = (TextView) findViewById(R.id.estadoConexion);
+
 
         colorBordeRegistro = email.getBackground();
         colorBordeRegistro.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
@@ -94,8 +94,16 @@ public class ActivityRegistro extends AppCompatActivity
         comision.setBackground(colorBordeRegistro);
 
 
-        verificarConexion(); // verifico si estoy conectado a internet
+        estadoConexionInternet = ConexionHttpUrlConexion.verificarConexion(ActivityRegistro.this); // verifico si estoy conectado a internet
 
+        if(estadoConexionInternet)
+        {
+            estadoConexion.setText("conexion establecida");
+        }
+        else
+        {
+            estadoConexion.setText("conexion no establecida");
+        }
 
         paqueteRegistro = new JSONObject();// creo objeto JSON para parsear la informacion que envio o recibo
         paqueteEvento = new JSONObject();
@@ -147,31 +155,6 @@ public class ActivityRegistro extends AppCompatActivity
 
         }
     };
-
-    private void verificarConexion()
-    {
-        estadoConexion = (TextView) findViewById(R.id.estadoConexion);
-
-        conexion = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE); // obtengo caracteristicas actuales de la conexion
-        informacionConexion = conexion.getActiveNetworkInfo(); // guardo las la informacion de las caracteristicas actuales de la conexion
-
-        if( informacionConexion != null && informacionConexion.isConnected()) // verifico que mi dispositivo esta conectado a internet
-        {
-            estadoConexionInternet = true;
-            estadoConexion.setText("estado de conexion: establecida");
-        }
-
-        else
-        {
-            estadoConexionInternet = false;
-            estadoConexion.setText("estado de conexion: sin conexion");
-        }
-
-
-    }
-
-
-
 
     private Handler manejadorMensajesHiloPrincipal()
     {
@@ -255,7 +238,7 @@ public class ActivityRegistro extends AppCompatActivity
             headerJsonDescripcion = "application/json";
             headerAuthorizationTipo = "Authorization:";
 
-            verificarConexion(); // chequeo la conexion de nuevo para que si no tengo internet y hago la peticion no se cierre la app de repente
+             estadoConexionInternet = ConexionHttpUrlConexion.verificarConexion(ActivityRegistro.this); // chequeo la conexion de nuevo para que si no tengo internet y hago la peticion no se cierre la app de repente
             if (estadoConexionInternet)
             {
                 urlRegistro = "http://so-unlam.net.ar/api/api/register";

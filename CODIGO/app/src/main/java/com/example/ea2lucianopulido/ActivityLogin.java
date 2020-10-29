@@ -88,11 +88,21 @@ public class ActivityLogin extends AppCompatActivity{
          colorBordeLogin.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
          emailLogin.setBackground(colorBordeLogin);
          passwordLogin.setBackground(colorBordeLogin);
+         estadoConexionLogin = (TextView) findViewById(R.id.estadoConexionLogin);
 
          Log.i("Eject","Eject onCreate Login");
 
-         verificarConexion();
+         estadoConexionInternet = ConexionHttpUrlConexion.verificarConexion(ActivityLogin.this);
          verificarEstadoCargaBateria();
+
+         if(estadoConexionInternet)
+         {
+             estadoConexionLogin.setText("conexion establecida");
+         }
+         else
+         {
+             estadoConexionLogin.setText("conexion no establecida");
+         }
 
          paquete =  new JSONObject();
          paqueteEvento = new JSONObject();
@@ -103,27 +113,6 @@ public class ActivityLogin extends AppCompatActivity{
 
 
 
-
-    }
-
-
-    public void verificarConexion()
-    {
-        estadoConexionLogin = (TextView) findViewById(R.id.estadoConexionLogin);
-
-        conexionLogin = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE); // obtengo caracteristicas actuales de la conexion
-        informacionConexionLogin = conexionLogin.getActiveNetworkInfo(); // guardo las la informacion de las caracteristicas actuales de la conexion
-
-        if( informacionConexionLogin != null && informacionConexionLogin.isConnected())// verifico que mi dispositivo esta conectado a internet
-        {
-            estadoConexionLogin.setText("estado de conexion: establecida");
-            estadoConexionInternet = true;
-        }
-        else
-        {
-            estadoConexionLogin.setText("estado de conexion: sin conexion");
-            estadoConexionInternet = false;
-        }
 
     }
 
@@ -221,7 +210,7 @@ private class ConexionHilos extends  Thread
                 headerJsonDescripcion = "application/json";
                 headerAuthorizationTipo = "Authorization:";
 
-                verificarConexion(); // chequeo la conexion de nuevo para que si no tengo internet y hago la peticion no se cierre la app de repente
+                estadoConexionInternet = ConexionHttpUrlConexion.verificarConexion(ActivityLogin.this); // chequeo la conexion de nuevo para que si no tengo internet y hago la peticion no se cierre la app de repente
                 if(estadoConexionInternet)
                 {
                     urlLogin = "http://so-unlam.net.ar/api/api/login";

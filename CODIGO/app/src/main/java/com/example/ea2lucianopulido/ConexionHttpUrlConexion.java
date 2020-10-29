@@ -1,5 +1,10 @@
 package com.example.ea2lucianopulido;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.widget.TextView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -24,6 +29,9 @@ public class ConexionHttpUrlConexion {
     private String headerAuthorizationDescripcion;
     private String token ;
     private String token_refresh;
+    private static ConnectivityManager conexion;
+    private static NetworkInfo informacionConexion;
+    private static boolean estadoConexionInternet;
 
 
     public ConexionHttpUrlConexion(String url, JSONObject paquete, String headerJsonTipo, String headerJsonDescripcion) {
@@ -156,6 +164,20 @@ public class ConexionHttpUrlConexion {
 
     }
 
+    protected static boolean verificarConexion(Context contexto)
+    {
+        String nombreContexto = Context.CONNECTIVITY_SERVICE;
+        conexion = (ConnectivityManager) contexto.getSystemService(Context.CONNECTIVITY_SERVICE); // obtengo caracteristicas actuales de la conexion
+        informacionConexion = conexion.getActiveNetworkInfo(); // guardo las la informacion de las caracteristicas actuales de la conexion
+
+        if( informacionConexion != null && informacionConexion.isConnected()) // verifico que mi dispositivo esta conectado a internet
+            estadoConexionInternet = true;
+        else
+            estadoConexionInternet = false;
+
+
+        return estadoConexionInternet;
+    }
     public int getRespuestaServidor() {
         return respuestaServidor;
     }

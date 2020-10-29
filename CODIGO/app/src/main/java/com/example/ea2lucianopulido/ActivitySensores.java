@@ -210,21 +210,6 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
     {
 
     }
-    public void verificarConexion()
-    {
-        conexionSensores = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE); // obtengo caracteristicas actuales de la conexion
-        informacionConexionSensores = conexionSensores.getActiveNetworkInfo(); // guardo las la informacion de las caracteristicas actuales de la conexion
-
-        if( informacionConexionSensores != null && informacionConexionSensores.isConnected())// verifico que mi dispositivo esta conectado a internet
-        {
-            estadoConexionInternet = true;
-        }
-        else
-        {
-            estadoConexionInternet = false;
-        }
-
-    }
 
     private class ConexionHilos extends Thread
     {
@@ -239,7 +224,7 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
                     fechaYhoraActual = Calendar.getInstance();
                     tiempoActual = fechaYhoraActual.getTimeInMillis();
 
-                    verificarConexion(); // chequeo la conexion de nuevo para que si no tengo internet y hago la peticion no se cierre la app de repente
+                    estadoConexionInternet = ConexionHttpUrlConexion.verificarConexion(ActivitySensores.this); // chequeo la conexion de nuevo para que si no tengo internet y hago la peticion no se cierre la app de repente
                     if (estadoConexionInternet)
                     {
                         if (tiempoActual == tiempoFinalizacionToken)

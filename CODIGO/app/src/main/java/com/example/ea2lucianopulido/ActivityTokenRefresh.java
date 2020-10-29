@@ -126,29 +126,13 @@ public class ActivityTokenRefresh extends AppCompatActivity {
         };
     }
 
-    public void verificarConexion()
-    {
-        conexionSensores = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE); // obtengo caracteristicas actuales de la conexion
-        informacionConexionSensores = conexionSensores.getActiveNetworkInfo(); // guardo las la informacion de las caracteristicas actuales de la conexion
-
-        if( informacionConexionSensores != null && informacionConexionSensores.isConnected())// verifico que mi dispositivo esta conectado a internet
-        {
-            estadoConexionInternet = true;
-        }
-        else
-        {
-            estadoConexionInternet = false;
-        }
-
-    }
-
     private class ConexionHilos extends  Thread
     {
         @Override
         public void run()
         {
 
-            verificarConexion();
+           estadoConexionInternet = ConexionHttpUrlConexion.verificarConexion(ActivityTokenRefresh.this);
             if(estadoConexionInternet)
             {
                 urlApiTokenRefresh = "http://so-unlam.net.ar/api/api/refresh";
