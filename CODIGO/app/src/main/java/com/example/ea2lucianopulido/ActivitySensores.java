@@ -277,7 +277,7 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
         if(!ConexionHttpUrlConexion.isTiempoFinalizacionTokenCreado())
         {
             fechaYhoraFinalizacionToken = Calendar.getInstance();
-            fechaYhoraFinalizacionToken.add(fechaYhoraFinalizacionToken.MINUTE,30);
+            fechaYhoraFinalizacionToken.add(fechaYhoraFinalizacionToken.MINUTE,29);
             tiempoFinalizacionToken = fechaYhoraFinalizacionToken.getTimeInMillis();
         }
         else

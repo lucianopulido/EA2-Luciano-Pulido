@@ -219,7 +219,7 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
         if(!ConexionHttpUrlConexion.isTiempoFinalizacionTokenCreado())
         {
             fechaYhoraFinalizacionToken = Calendar.getInstance();
-            fechaYhoraFinalizacionToken.add(fechaYhoraFinalizacionToken.MINUTE,30);
+            fechaYhoraFinalizacionToken.add(fechaYhoraFinalizacionToken.MINUTE,29);
             tiempoFinalizacionToken = fechaYhoraFinalizacionToken.getTimeInMillis();
         }
         else
