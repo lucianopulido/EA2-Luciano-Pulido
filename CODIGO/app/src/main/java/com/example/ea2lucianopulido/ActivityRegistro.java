@@ -172,7 +172,7 @@ public class ActivityRegistro extends AppCompatActivity
                             try {
                                 Intent intentRegistroSensores = new Intent(ActivityRegistro.this, ActivitySensores.class);
                                 token = conexionHttpUrlConexionRegistro.getPaqueteRecibido().getString("token");
-                                token_refresh = conexionHttpUrlConexionRegistro.getPaqueteRecibido().getString("token");
+                                token_refresh = conexionHttpUrlConexionRegistro.getPaqueteRecibido().getString("token_refresh");
                                 intentRegistroSensores.putExtra("token", token);
                                 intentRegistroSensores.putExtra("token_refresh",token_refresh);
                                 startActivity(intentRegistroSensores);
@@ -251,7 +251,7 @@ public class ActivityRegistro extends AppCompatActivity
                 mensajeExitoso.obj = conexionHttpUrlConexionRegistro.getRespuestaServidor();
 
                 urlEvento = "http://so-unlam.net.ar/api/api/event"; // registro el evento del registro en las proximas 2 lineas
-                headerAuthorizationDescripcion += conexionHttpUrlConexionRegistro.getToken();
+                headerAuthorizationDescripcion  = conexionHttpUrlConexionRegistro.getToken();
                 conexionHttpUrlConexionEvento   = new ConexionHttpUrlConexion(urlEvento, paqueteEvento, headerJsonTipo, headerJsonDescripcion, headerAuthorizationTipo, headerAuthorizationDescripcion);
 
                 comunicadorHilos.sendMessage(mensajeExitoso);

@@ -28,14 +28,13 @@ public class ConexionHttpUrlConexion {
     private String headerAuthorizationTipo;
     private String headerJsonDescripcion;
     private String headerAuthorizationDescripcion;
-    private static String token ;
+    private static String token;
     private static String token_refresh;
-    private static Calendar fechaYhoraFinalizacionToken;
-
+    private static boolean tiempoFinalizacionTokenCreado = false;
     private static ConnectivityManager conexion;
     private static NetworkInfo informacionConexion;
     private static boolean estadoConexionInternet;
-
+    private static String activity;
 
     public ConexionHttpUrlConexion(String url, JSONObject paquete, String headerJsonTipo, String headerJsonDescripcion) {
         this.paquete = paquete;
@@ -55,18 +54,18 @@ public class ConexionHttpUrlConexion {
 
             peticion.connect();// envio la consulta
             respuestaServidor = peticion.getResponseCode(); // obtengo la respuesta
-            analizarRespuestaServidor(respuestaServidor,peticion);
+            analizarRespuestaServidor(respuestaServidor, peticion);
             datosSalida.flush();
             datosSalida.close();
 
-        }catch (IOException | JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             peticion.disconnect();
         }
     }
 
-    public ConexionHttpUrlConexion(String url, JSONObject paquete , String headerJsonTipo, String headerJsonDescripcion,String headerAuthorizationTipo, String headerAuthorizationDescripcion) {
+    public ConexionHttpUrlConexion(String url, JSONObject paquete, String headerJsonTipo, String headerJsonDescripcion, String headerAuthorizationTipo, String headerAuthorizationDescripcion) {
         this.paquete = paquete;
         this.url = url;
         this.headerJsonTipo = headerJsonTipo;
@@ -82,28 +81,26 @@ public class ConexionHttpUrlConexion {
             peticion.setDoOutput(true);
             peticion.setRequestMethod("POST");// seteo el tipo de peticion
             peticion.setRequestProperty(this.headerJsonTipo, this.headerJsonDescripcion); // configuro el header
-            peticion.setRequestProperty(this.headerAuthorizationTipo,this.headerAuthorizationDescripcion);
+            peticion.setRequestProperty(this.headerAuthorizationTipo, this.headerAuthorizationDescripcion);
             datosSalida = new DataOutputStream(peticion.getOutputStream());
             datosSalida.writeBytes(this.paquete.toString());
 
             peticion.connect();// envio la consulta
             respuestaServidor = peticion.getResponseCode(); // obtengo la respuesta
-            analizarRespuestaServidor(respuestaServidor,peticion); // identifico y seteo el tipo de respuesta
+            analizarRespuestaServidor(respuestaServidor, peticion); // identifico y seteo el tipo de respuesta
 
             datosSalida.flush();
             datosSalida.close();
 
-        }catch (IOException | JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             peticion.disconnect();
         }
     }
 
 
-
-    public ConexionHttpUrlConexion(String url, String headerJsonTipo, String headerJsonDescripcion,String headerAuthorizationTipo, String headerAuthorizationDescripcion)
-    {
+    public ConexionHttpUrlConexion(String url, String headerJsonTipo, String headerJsonDescripcion, String headerAuthorizationTipo, String headerAuthorizationDescripcion) {
         this.url = url;
         this.headerJsonTipo = headerJsonTipo;
         this.headerJsonDescripcion = headerJsonDescripcion;
@@ -117,25 +114,25 @@ public class ConexionHttpUrlConexion {
             peticion.setDoOutput(true);
             peticion.setRequestMethod("PUT");// seteo el tipo de peticion
             peticion.setRequestProperty(this.headerJsonTipo, this.headerJsonDescripcion); // configuro el header
-            peticion.setRequestProperty(this.headerAuthorizationTipo,this.headerAuthorizationDescripcion);
+            peticion.setRequestProperty(this.headerAuthorizationTipo, this.headerAuthorizationDescripcion);
 
             peticion.connect();// envio la consulta
             respuestaServidor = peticion.getResponseCode(); // obtengo la respuesta
-            analizarRespuestaServidor(respuestaServidor,peticion); // identifico y seteo el tipo de respuesta
+            analizarRespuestaServidor(respuestaServidor, peticion); // identifico y seteo el tipo de respuesta
 
-        }catch (IOException | JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             peticion.disconnect();
         }
     }
+
     private void convertInputToString(InputStreamReader inputStream) throws IOException, JSONException {
 
         BufferedReader leer = new BufferedReader(inputStream);
         StringBuilder sb = new StringBuilder();
         String line;
-        while( (line = leer.readLine()) != null)
-        {
+        while ((line = leer.readLine()) != null) {
             sb.append(line);
 
         }
@@ -144,36 +141,32 @@ public class ConexionHttpUrlConexion {
         paqueteRecibido = new JSONObject(sb.toString());
     }
 
-    private void analizarRespuestaServidor(int respuestaServidor , HttpURLConnection peticion) throws IOException, JSONException {
+    private void analizarRespuestaServidor(int respuestaServidor, HttpURLConnection peticion) throws IOException, JSONException {
 
 
-        if(respuestaServidor == HttpURLConnection.HTTP_OK)
-        {
+        if (respuestaServidor == HttpURLConnection.HTTP_OK) {
             convertInputToString(new InputStreamReader(peticion.getInputStream()));
             setToken(getPaqueteRecibido().getString("token"));
             setToken(getPaqueteRecibido().getString("token_refresh"));
             setRespuestaServidor(respuestaServidor);
         }
-        if(respuestaServidor == HttpURLConnection.HTTP_CREATED)
-        {
+        if (respuestaServidor == HttpURLConnection.HTTP_CREATED) {
             convertInputToString(new InputStreamReader(peticion.getInputStream()));
             setRespuestaServidor(respuestaServidor);
         }
-        if(respuestaServidor == HttpURLConnection.HTTP_BAD_REQUEST)
-        {
+        if (respuestaServidor == HttpURLConnection.HTTP_BAD_REQUEST) {
             convertInputToString(new InputStreamReader(peticion.getErrorStream()));
             setRespuestaServidor(respuestaServidor);
         }
 
     }
 
-    protected static boolean verificarConexion(Context contexto)
-    {
+    protected static boolean verificarConexion(Context contexto) {
         String nombreContexto = Context.CONNECTIVITY_SERVICE;
         conexion = (ConnectivityManager) contexto.getSystemService(Context.CONNECTIVITY_SERVICE); // obtengo caracteristicas actuales de la conexion
         informacionConexion = conexion.getActiveNetworkInfo(); // guardo las la informacion de las caracteristicas actuales de la conexion
 
-        if( informacionConexion != null && informacionConexion.isConnected()) // verifico que mi dispositivo esta conectado a internet
+        if (informacionConexion != null && informacionConexion.isConnected()) // verifico que mi dispositivo esta conectado a internet
             estadoConexionInternet = true;
         else
             estadoConexionInternet = false;
@@ -181,12 +174,12 @@ public class ConexionHttpUrlConexion {
 
         return estadoConexionInternet;
     }
+
     public int getRespuestaServidor() {
         return respuestaServidor;
     }
 
-    public void setRespuestaServidor(int respuestaServidor)
-    {
+    public void setRespuestaServidor(int respuestaServidor) {
         this.respuestaServidor = respuestaServidor;
     }
 
@@ -212,5 +205,21 @@ public class ConexionHttpUrlConexion {
 
     public void setToken_refresh(String token_refresh) {
         this.token_refresh = token_refresh;
+    }
+
+    public static boolean isTiempoFinalizacionTokenCreado() {
+        return tiempoFinalizacionTokenCreado;
+    }
+
+    public static void setTiempoFinalizacionTokenCreado(boolean tiempoFinalizacionTokenCreado) {
+        ConexionHttpUrlConexion.tiempoFinalizacionTokenCreado = tiempoFinalizacionTokenCreado;
+    }
+
+    public  static  String getActivity() {
+        return activity;
+    }
+
+    public static  void  setActivity(String activity) {
+        ConexionHttpUrlConexion.activity = activity;
     }
 }

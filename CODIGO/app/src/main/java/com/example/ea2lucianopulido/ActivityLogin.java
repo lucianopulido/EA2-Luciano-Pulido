@@ -113,10 +113,6 @@ public class ActivityLogin extends AppCompatActivity{
          iniciarSesion.setOnClickListener(botonLoginListeners);
          crearCuenta.setOnClickListener(botonLoginListeners);
          comunicadorHilos = manejadorMensajesHiloPrincipal();
-
-
-
-
     }
 
     private void verificarEstadoCargaBateria()

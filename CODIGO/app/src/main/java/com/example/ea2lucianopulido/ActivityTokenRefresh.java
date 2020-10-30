@@ -23,6 +23,7 @@ import android.widget.Toast;
 import org.json.JSONException;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 
 public class ActivityTokenRefresh extends AppCompatActivity {
 
@@ -46,7 +47,8 @@ public class ActivityTokenRefresh extends AppCompatActivity {
     private ConnectivityManager conexionSensores;
     private NetworkInfo informacionConexionSensores;
     private static final int SINCONEXIONINTERNET = 100;
-
+    private String nombreActivity;
+    private ArrayList<String> eventosSensor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);// hago que la activity solo se muestre verticalmente cuando se gira el celular horizontal para no tener que reacomodar la interfaz grafica
@@ -56,6 +58,10 @@ public class ActivityTokenRefresh extends AppCompatActivity {
         intent = getIntent();
         datosRecibidos = intent.getExtras();
         token_refresh = datosRecibidos.getString("token_refresh");
+
+        eventosSensor = new ArrayList<String>();
+        eventosSensor.addAll(datosRecibidos.getStringArrayList("eventosSensor"));
+
 
 
         Log.i("Eject","Eject onCreate ActivityTokenRefresh");
@@ -73,21 +79,37 @@ public class ActivityTokenRefresh extends AppCompatActivity {
         @Override
         public void onClick(View v)
         {
+                    nombreActivity = ConexionHttpUrlConexion.getActivity();
+                    System.out.println("Activity destino:"+nombreActivity);
             switch (v.getId())
             {
                 case R.id.boton_seguir:
 
-                        tokenRefreshSensores = new Intent(ActivityTokenRefresh.this,ActivitySensores.class);
-                        conexionHilos = new ConexionHilos();
-                        conexionHilos.start();
+                        switch (nombreActivity)
+                        {
 
-                    break;
+                            case "ActivitySensores":
+                                ConexionHttpUrlConexion.setTiempoFinalizacionTokenCreado(false);
+                                tokenRefreshSensores = new Intent(ActivityTokenRefresh.this, ActivitySensores.class);
+                                conexionHilos = new ConexionHilos();
+                                conexionHilos.start();
+                                break;
+
+                            case "ActivityListaEventosSensorProximidad":
+                                ConexionHttpUrlConexion.setTiempoFinalizacionTokenCreado(false);
+                                tokenRefreshSensores = new Intent(ActivityTokenRefresh.this, ActivityListaEventosSensorProximidad.class);
+                                conexionHilos = new ConexionHilos();
+                                conexionHilos.start();
+
+                                break;
+                        }
+                break;
                 case R.id.boton_cerrar_sesion:
 
                     tokenRefreshLogin = new Intent(ActivityTokenRefresh.this,ActivityLogin.class);
                     startActivity(tokenRefreshLogin);
 
-                    break;
+                break;
             }
         }
     };
@@ -107,6 +129,7 @@ public class ActivityTokenRefresh extends AppCompatActivity {
                             token_refresh = conexionHttpUrlConexionToken.getPaqueteRecibido().getString("token_refresh");
                             tokenRefreshSensores.putExtra("token",token);
                             tokenRefreshSensores.putExtra("token_refresh",token_refresh);
+                            tokenRefreshSensores.putExtra("eventosSensor",eventosSensor);
                             startActivity(tokenRefreshSensores);
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -176,6 +199,7 @@ public class ActivityTokenRefresh extends AppCompatActivity {
     protected void onPause() {
         Log.i("Eject","Eject onPause ActivityTokenRefresh");
         super.onPause();
+        datosRecibidos.clear();
     }
 
     @Override

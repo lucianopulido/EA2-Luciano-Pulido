@@ -92,19 +92,12 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
         token = datosRecibidos.getString("token");
         token_refresh = datosRecibidos.getString("token_refresh");
 
-        System.out.println("token: "+token);
-
-
+        // empiezo a calcular el tiempo en el cual hay que renovar el token
         fechaYhoraActual = Calendar.getInstance();
-        fechaYhoraFinalizacionToken = Calendar.getInstance();
-        fechaYhoraFinalizacionToken.add(fechaYhoraFinalizacionToken.MINUTE,30);
         tiempoActual = fechaYhoraActual.getTimeInMillis();
-        tiempoFinalizacionToken = fechaYhoraFinalizacionToken.getTimeInMillis();
 
         enActivitySensores = true;
 
-        conexionHilos = new ConexionHilos();
-        conexionHilos.start();
 
         verEventosSensorProximidad.setOnClickListener(botonesListeners);
 
@@ -127,6 +120,7 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
             sensoresListaEventos.putExtra("eventosSensor",eventosSensor);
             sensoresListaEventos.putExtra("token",token);
             sensoresListaEventos.putExtra("token_refresh",token_refresh);
+            sensoresListaEventos.putExtra("tiempoFinalizacionToken",tiempoFinalizacionToken);
 
             startActivity(sensoresListaEventos);
         }
@@ -180,6 +174,8 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
 
                         sensoresTokenRefresh = new Intent(ActivitySensores.this,ActivityTokenRefresh.class);
                         sensoresTokenRefresh.putExtra("token_refresh",token_refresh);
+                        sensoresTokenRefresh.putExtra("eventosSensor",eventosSensor);
+                        ConexionHttpUrlConexion.setActivity("ActivitySensores");
                         startActivity(sensoresTokenRefresh);
 
                         break;
@@ -218,39 +214,43 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
                     estadoConexionInternet = ConexionHttpUrlConexion.verificarConexion(ActivitySensores.this); // chequeo la conexion de nuevo para que si no tengo internet y hago la peticion no se cierre la app de repente
                     if (estadoConexionInternet)
                     {
-                        if (tiempoActual == tiempoFinalizacionToken)
-                        {
-                            mensaje = new Message();
-                            mensaje.obj = TOKENEXPIRADO;
-                            comunicadorHilos.sendMessage(mensaje);
-                        }
-                        if(sensorEstimulado)
-                        {
-                            try {
-                                sensorEstimulado = false;
-                                paqueteEvento.put("env", "PROD");
-                                paqueteEvento.put("type_events", "sensor");
-                                paqueteEvento.put("description", "sensor proximidad");
-
-                                urlEvento = "http://so-unlam.net.ar/api/api/event";
-
-                                headerJsonTipo = "content-type";
-                                headerJsonDescripcion = "application/json";
-                                headerAuthorizationTipo = "Authorization:";
-                                headerAuthorizationDescripcion = token;
-
-                                conexionHttpUrlConexionEvento = new ConexionHttpUrlConexion(urlEvento, paqueteEvento, headerJsonTipo, headerJsonDescripcion, headerAuthorizationTipo, headerAuthorizationDescripcion);
-
-                                evento = conexionHttpUrlConexionEvento.getPaqueteRecibido().getJSONObject("event"); // obtengo y guardo el json para listar el evento
-                                cadenaEvento = evento.getString("id") +" "+evento.getString("dni")+" "+evento.getString("type_events")+" "+evento.getString("description")+" ";
-                                cadenaEvento += fechaYhoraActual.get(fechaYhoraActual.DATE)+" "+fechaYhoraActual.get(fechaYhoraActual.HOUR)+" "+fechaYhoraActual.get(fechaYhoraActual.MINUTE)+" "+fechaYhoraActual.get(fechaYhoraActual.SECOND);
-                                eventosSensor.add(cadenaEvento);
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+                            if (tiempoActual == tiempoFinalizacionToken)
+                            {
+                                mensaje = new Message();
+                                mensaje.obj = TOKENEXPIRADO;
+                                comunicadorHilos.sendMessage(mensaje);
                             }
-                        }
-                    } else {
+                            if(sensorEstimulado)
+                            {
+                                try
+                                {
+                                    sensorEstimulado = false;
+                                    paqueteEvento.put("env", "PROD");
+                                    paqueteEvento.put("type_events", "sensor");
+                                    paqueteEvento.put("description", "sensor proximidad");
+
+                                    urlEvento = "http://so-unlam.net.ar/api/api/event";
+
+                                    headerJsonTipo = "content-type";
+                                    headerJsonDescripcion = "application/json";
+                                    headerAuthorizationTipo = "Authorization:";
+                                    headerAuthorizationDescripcion = token;
+
+                                    conexionHttpUrlConexionEvento = new ConexionHttpUrlConexion(urlEvento, paqueteEvento, headerJsonTipo, headerJsonDescripcion, headerAuthorizationTipo, headerAuthorizationDescripcion);
+
+                                    evento = conexionHttpUrlConexionEvento.getPaqueteRecibido().getJSONObject("event"); // obtengo y guardo el json para listar el evento
+                                    cadenaEvento = evento.getString("id") +" "+evento.getString("dni")+" "+evento.getString("type_events")+" "+evento.getString("description")+" ";
+                                    cadenaEvento += fechaYhoraActual.get(fechaYhoraActual.DATE)+" "+fechaYhoraActual.get(fechaYhoraActual.HOUR)+" "+fechaYhoraActual.get(fechaYhoraActual.MINUTE)+" "+fechaYhoraActual.get(fechaYhoraActual.SECOND);
+                                    eventosSensor.add(cadenaEvento);
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                    }
+                    else
+                    {
                         Message mensajeErrorInternet = new Message();
                         mensajeErrorInternet.obj = SINCONEXIONINTERNET;
                         comunicadorHilos.sendMessage(mensajeErrorInternet);
@@ -273,6 +273,22 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
         super.onResume();
         administradorSensores.registerListener(this,acelerometro,SensorManager.SENSOR_DELAY_NORMAL);
         administradorSensores.registerListener(this, sensorProximidad,SensorManager.SENSOR_DELAY_NORMAL);
+
+        if(!ConexionHttpUrlConexion.isTiempoFinalizacionTokenCreado())
+        {
+            fechaYhoraFinalizacionToken = Calendar.getInstance();
+            fechaYhoraFinalizacionToken.add(fechaYhoraFinalizacionToken.MINUTE,30);
+            tiempoFinalizacionToken = fechaYhoraFinalizacionToken.getTimeInMillis();
+        }
+        else
+        {
+            tiempoFinalizacionToken = datosRecibidos.getLong("tiempoFinalizacionToken");
+        }
+
+
+        conexionHilos = new ConexionHilos();
+        conexionHilos.start();
+
     }
 
 
@@ -283,7 +299,7 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
         super.onPause();
         administradorSensores.unregisterListener(this,administradorSensores.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
         administradorSensores.unregisterListener(this,administradorSensores.getDefaultSensor(Sensor.TYPE_PROXIMITY));
-
+        enActivitySensores = false; // libero los hilos
 
         }
 
@@ -297,6 +313,6 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
     protected void onDestroy() {
         Log.i("Eject","Eject onDestroy ActivitySensores");
         super.onDestroy();
-        enActivitySensores = false; // libero los hilos
+
     }
 }
