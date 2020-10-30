@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
 
 public class ConexionHttpUrlConexion {
 
@@ -27,8 +28,10 @@ public class ConexionHttpUrlConexion {
     private String headerAuthorizationTipo;
     private String headerJsonDescripcion;
     private String headerAuthorizationDescripcion;
-    private String token ;
-    private String token_refresh;
+    private static String token ;
+    private static String token_refresh;
+    private static Calendar fechaYhoraFinalizacionToken;
+
     private static ConnectivityManager conexion;
     private static NetworkInfo informacionConexion;
     private static boolean estadoConexionInternet;

@@ -33,9 +33,10 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
     private String token;
     private String token_refresh;
     private  SharedPreferences preferencias;
-    private SharedPreferences.Editor editor;
     private ArrayList <String> eventosSensor;
     private Set <String> setEventosSensor;
+    private SharedPreferences.Editor editor;
+    private  boolean shpLimpio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +53,7 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
         eventosSensor = new ArrayList<String>();
         setEventosSensor = new HashSet<String>();
 
-        cargarEventosSharePreferences(); // cargo los eventos del sensor de proximidad grabados previamente en el sharepreferences
+
 
         intent = getIntent();
         datosRecibidos = intent.getExtras();
@@ -84,14 +85,18 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
 
     private void guardarEventosSharePreferences()
     {
+
             preferencias = getSharedPreferences("eventosSensorProximidad",Context.MODE_PRIVATE);
             editor = preferencias.edit();
             setEventosSensor.addAll(eventosSensor);
-            System.out.println("cantidad de elementos del arraylist setEventosSensor:"+setEventosSensor.size());
+
+            if(!shpLimpio)
+            {
+                editor.clear(); // si tiene algo borro lo que tenia y luego lo vuelvo a escribir porque sino no puedo actualizar el sharepreferences porque es inmutable
+            }
+
             editor.putStringSet("eventosSensor",setEventosSensor);
             editor.commit(); // grabo el archivo
-            System.out.println("estoy grabando en SharePreferences");
-
     }
 
     private void cargarEventosSharePreferences()
@@ -99,22 +104,15 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
             preferencias = getSharedPreferences("eventosSensorProximidad",Context.MODE_PRIVATE);
             setEventosSensor = preferencias.getStringSet("eventosSensor",null);
 
-            System.out.println("cantidad de elementos del arraylist setEventosSensor:"+setEventosSensor.size());
             if(setEventosSensor!=null)
             {
-                System.out.println("Estoy cargando el SharePreferences");
                 eventosSensor.addAll(setEventosSensor);
-                System.out.println("cantidad de elementos del arraylist eventosSensor:"+eventosSensor.size());
             }
-
             else
             {
-                System.out.println("El archivo de preferencias no existe");
+                shpLimpio = true;
                 setEventosSensor = new HashSet<String>();
             }
-
-
-
     }
 
     @Override
@@ -128,6 +126,7 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
     {
         Log.i("Eject","Eject onResume ActivityListaEventos");
         super.onResume();
+        cargarEventosSharePreferences(); // cargo los eventos del sensor de proximidad grabados previamente en el sharepreferences
     }
 
     @Override

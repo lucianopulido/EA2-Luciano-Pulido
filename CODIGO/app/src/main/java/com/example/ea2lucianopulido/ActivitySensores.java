@@ -244,7 +244,6 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
                                 evento = conexionHttpUrlConexionEvento.getPaqueteRecibido().getJSONObject("event"); // obtengo y guardo el json para listar el evento
                                 cadenaEvento = evento.getString("id") +" "+evento.getString("dni")+" "+evento.getString("type_events")+" "+evento.getString("description")+" ";
                                 cadenaEvento += fechaYhoraActual.get(fechaYhoraActual.DATE)+" "+fechaYhoraActual.get(fechaYhoraActual.HOUR)+" "+fechaYhoraActual.get(fechaYhoraActual.MINUTE)+" "+fechaYhoraActual.get(fechaYhoraActual.SECOND);
-                                System.out.println("evento: "+cadenaEvento);
                                 eventosSensor.add(cadenaEvento);
 
                             } catch (JSONException e) {
