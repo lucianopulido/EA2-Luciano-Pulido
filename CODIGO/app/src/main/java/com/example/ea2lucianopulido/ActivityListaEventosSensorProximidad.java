@@ -4,24 +4,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
 
-    private ArrayList<String> idEvento;
-    private ArrayList <String> descripcionEvento;
-    private ArrayList <String> tipoEvento ;
-    private ArrayList <String> dni;
+
     private RecyclerView listaEventos;
     private RecyclerView.LayoutManager layoutListaEventos;
     private Adaptador adaptador;
@@ -32,6 +33,9 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
     private String token;
     private String token_refresh;
     private SharedPreferences preferencias;
+    private SharedPreferences.Editor editor;
+    private ArrayList <String> eventosSensor;
+    private Set <String> setEventosSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,29 +49,23 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
 
         verSensores.setOnClickListener(botonesListeners);
 
-        idEvento = new ArrayList<String>();
-        tipoEvento = new ArrayList<String>();
-        descripcionEvento = new ArrayList<String>();
-        dni = new ArrayList<String>();
+        eventosSensor = new ArrayList<String>();
+        setEventosSensor = new HashSet<String>();
 
         intent = getIntent();
         datosRecibidos = intent.getExtras();
 
         Log.i("Eject","Eject onCreate ActivityListaEventos");
 
-        idEvento = datosRecibidos.getStringArrayList("idEvento");
-        tipoEvento = datosRecibidos.getStringArrayList("tipoEvento");
-        descripcionEvento = datosRecibidos.getStringArrayList("descripcionEvento");
-        dni = datosRecibidos.getStringArrayList("dni");
+        eventosSensor.addAll(datosRecibidos.getStringArrayList("eventosSensor"));
         token = datosRecibidos.getString("token");
         token_refresh = datosRecibidos.getString("token_refresh");
 
-        adaptador = new Adaptador(this,tipoEvento,descripcionEvento,dni,idEvento);
+
+        adaptador = new Adaptador(this,eventosSensor);
         listaEventos.setAdapter(adaptador);
         layoutListaEventos = new LinearLayoutManager(this);
         listaEventos.setLayoutManager(layoutListaEventos);
-
-
 
     }
 
@@ -84,10 +82,28 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
         }
     };
 
-    private void guardarPreferencias()
+    private void guardarEventosSharePreferences()
     {
-      //  preferencias = getSharedPreferences();
 
+        if(!eventosSensor.isEmpty())
+        {
+            preferencias = PreferenceManager.getDefaultSharedPreferences(this);
+            editor = preferencias.edit();
+            setEventosSensor.addAll(eventosSensor);
+            editor.putStringSet("eventosSensor",setEventosSensor);
+            editor.commit(); // grabo el archivo
+        }
+    }
+
+    private void cargarEventosSharePreferences()
+    {
+            preferencias = PreferenceManager.getDefaultSharedPreferences(this);
+            setEventosSensor = preferencias.getStringSet("eventosSensor",null);
+
+            if(setEventosSensor!=null)
+            eventosSensor.addAll(setEventosSensor);
+            else
+                setEventosSensor = new HashSet<String>();
     }
 
     @Override
@@ -101,26 +117,28 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
     {
         Log.i("Eject","Eject onResume ActivityListaEventos");
         super.onResume();
+        cargarEventosSharePreferences(); // cargo los eventos del sensor de proximidad grabados previamente en el sharepreferences
     }
-
-
 
     @Override
     protected void onPause() {
         Log.i("Eject","Eject onPause ActivityListaEventos");
         super.onPause();
+        guardarEventosSharePreferences();
     }
 
     @Override
     protected void onStop() {
         Log.i("Eject","Eject onStop ActivityListaEventos");
         super.onStop();
+
     }
 
     @Override
     protected void onDestroy() {
         Log.i("Eject","Eject onDestroy ActivityListaEventos");
         super.onDestroy();
+
     }
 
 }

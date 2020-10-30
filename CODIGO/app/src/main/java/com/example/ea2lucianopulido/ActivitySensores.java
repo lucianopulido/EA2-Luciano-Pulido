@@ -67,10 +67,8 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
     private String token_refresh;
     private static final int SINCONEXIONINTERNET = 100;
     private static final int TOKENEXPIRADO = 101;
-    private ArrayList <String> idEvento;
-    private ArrayList <String> descripcionEvento;
-    private ArrayList <String> tipoEvento ;
-    private ArrayList <String> dni;
+    private ArrayList <String> eventosSensor;
+    private String cadenaEvento;
     private Button verEventosSensorProximidad;
     private Intent sensoresTokenRefresh;
     private Intent sensoresListaEventos;
@@ -88,11 +86,8 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
         textFieldVibracion = (TextView) findViewById(R.id.outPutVibracion);
         verEventosSensorProximidad = (Button) findViewById(R.id.boton_lista_eventos_sensor);
 
-        idEvento = new ArrayList<String>();
-        tipoEvento = new ArrayList<String>();
-        descripcionEvento = new ArrayList<String>();
-        dni = new ArrayList<String>();
 
+        eventosSensor = new ArrayList<String>();
 
         Intent intent = getIntent();
         datosRecibidos = intent.getExtras();
@@ -131,12 +126,10 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
         public void onClick(View v)
         {
             sensoresListaEventos = new Intent(ActivitySensores.this,ActivityListaEventosSensorProximidad.class);
-            sensoresListaEventos.putExtra("idEvento",idEvento);
-            sensoresListaEventos.putExtra("tipoEvento",tipoEvento);
-            sensoresListaEventos.putExtra("descripcionEvento",descripcionEvento);
+            sensoresListaEventos.putExtra("eventosSensor",eventosSensor);
             sensoresListaEventos.putExtra("token",token);
             sensoresListaEventos.putExtra("token_refresh",token_refresh);
-            sensoresListaEventos.putExtra("dni",dni);
+
             startActivity(sensoresListaEventos);
         }
     };
@@ -238,7 +231,7 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
                             try {
                                 sensorEstimulado = false;
                                 paqueteEvento.put("env", "PROD");
-                                paqueteEvento.put("type_events", "sensor estimulado");
+                                paqueteEvento.put("type_events", "sensor");
                                 paqueteEvento.put("description", "sensor proximidad");
 
                                 urlEvento = "http://so-unlam.net.ar/api/api/event";
@@ -251,10 +244,10 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
                                 conexionHttpUrlConexionEvento = new ConexionHttpUrlConexion(urlEvento, paqueteEvento, headerJsonTipo, headerJsonDescripcion, headerAuthorizationTipo, headerAuthorizationDescripcion);
 
                                 evento = conexionHttpUrlConexionEvento.getPaqueteRecibido().getJSONObject("event"); // obtengo y guardo el json para listar el evento
-                                tipoEvento.add(evento.getString("type_events"));
-                                dni.add(evento.getString("dni"));
-                                descripcionEvento.add(evento.getString("description"));
-                                idEvento.add(evento.getString("id"));
+                                cadenaEvento = evento.getString("id") +" "+evento.getString("dni")+" "+evento.getString("type_events")+" "+evento.getString("description")+" ";
+                                cadenaEvento += fechaYhoraActual.get(fechaYhoraActual.DATE)+" "+fechaYhoraActual.get(fechaYhoraActual.HOUR)+" "+fechaYhoraActual.get(fechaYhoraActual.MINUTE)+" "+fechaYhoraActual.get(fechaYhoraActual.SECOND);
+                                System.out.println("evento: "+cadenaEvento);
+                                eventosSensor.add(cadenaEvento);
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
