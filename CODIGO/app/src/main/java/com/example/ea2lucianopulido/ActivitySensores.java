@@ -55,8 +55,6 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
     private Handler comunicadorHilos;
     private Message mensaje;
     private boolean estadoConexionInternet;
-    private ConnectivityManager conexionSensores;
-    private NetworkInfo informacionConexionSensores;
     private Calendar fechaYhoraActual;
     private Calendar fechaYhoraFinalizacionToken;
     private boolean enActivitySensores;
