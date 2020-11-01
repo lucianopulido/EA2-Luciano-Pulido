@@ -71,7 +71,7 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
     private Intent sensoresTokenRefresh;
     private Intent sensoresListaEventos;
     private JSONObject evento;
-
+    private int contadorMensajeErrorSinInternet;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);// hago que la activity solo se muestre verticalmente cuando se gira el celular horizontal para no tener que reacomodar la interfaz grafica
@@ -153,7 +153,13 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
                     if(event.values[0] < sensorProximidad.getMaximumRange())
                     {
                         textFieldProximidad.setText(texto);
-                        sensorEstimulado = true;
+                        estadoConexionInternet = ConexionHttpUrlConexion.verificarConexion(ActivitySensores.this);
+
+                        if(estadoConexionInternet)
+                        {
+                            sensorEstimulado = true;
+                        }
+
                     }
                     else
                     {
@@ -214,6 +220,7 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
                     estadoConexionInternet = ConexionHttpUrlConexion.verificarConexion(ActivitySensores.this); // chequeo la conexion de nuevo para que si no tengo internet y hago la peticion no se cierre la app de repente
                     if (estadoConexionInternet)
                     {
+                        contadorMensajeErrorSinInternet = 0;
                             if (tiempoActual == tiempoFinalizacionToken)
                             {
                                 mensaje = new Message();
@@ -251,9 +258,14 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
                     }
                     else
                     {
-                        Message mensajeErrorInternet = new Message();
-                        mensajeErrorInternet.obj = SINCONEXIONINTERNET;
-                        comunicadorHilos.sendMessage(mensajeErrorInternet);
+                        contadorMensajeErrorSinInternet++;
+                        if(contadorMensajeErrorSinInternet == 1) // esto lo hago para que muestre el mensaje de error una sola vez y no se cuelgue la interfaz grafica
+                        {
+                            Message mensajeErrorInternet = new Message();
+                            mensajeErrorInternet.obj = SINCONEXIONINTERNET;
+                            comunicadorHilos.sendMessage(mensajeErrorInternet);
+                        }
+
                     }
             }
         }
@@ -285,7 +297,7 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
             tiempoFinalizacionToken = datosRecibidos.getLong("tiempoFinalizacionToken");
         }
 
-
+        contadorMensajeErrorSinInternet = 0;
         conexionHilos = new ConexionHilos();
         conexionHilos.start();
 

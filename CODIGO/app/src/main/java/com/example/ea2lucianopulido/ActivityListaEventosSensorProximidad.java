@@ -55,6 +55,7 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
     private Handler comunicadorHilos;
     private Intent sensoresTokenRefresh;
     private Calendar fechaYhoraFinalizacionToken;
+    private int contadorMensajeErrorSinInternet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,7 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
 
         eventosSensor = new ArrayList<String>();
         setEventosSensor = new HashSet<String>();
+
 
         enActivityListaEventosSensorProximidad = true;
 
@@ -184,6 +186,8 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
                 estadoConexionInternet = ConexionHttpUrlConexion.verificarConexion(ActivityListaEventosSensorProximidad.this); // chequeo la conexion de nuevo para que si no tengo internet y hago la peticion no se cierre la app de repente
                 if (estadoConexionInternet)
                 {
+                    contadorMensajeErrorSinInternet = 0;
+
                         if (tiempoActual == tiempoFinalizacionToken)
                         {
                             mensaje = new Message();
@@ -194,9 +198,15 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
                 }
                 else
                 {
-                    Message mensajeErrorInternet = new Message();
-                    mensajeErrorInternet.obj = SINCONEXIONINTERNET;
-                    comunicadorHilos.sendMessage(mensajeErrorInternet);
+                    contadorMensajeErrorSinInternet++;
+
+                    if(contadorMensajeErrorSinInternet == 1) // esto lo hago para que se muestre el mensaje de error una sola vez y no se cuelgue la interfaz grafica
+                    {
+                        Message mensajeErrorInternet = new Message();
+                        mensajeErrorInternet.obj = SINCONEXIONINTERNET;
+                        comunicadorHilos.sendMessage(mensajeErrorInternet);
+                    }
+
                 }
             }
         }
@@ -227,6 +237,7 @@ public class ActivityListaEventosSensorProximidad extends AppCompatActivity {
             tiempoFinalizacionToken = datosRecibidos.getLong("tiempoFinalizacionToken");
         }
 
+        contadorMensajeErrorSinInternet = 0;
         conexionHilos = new ConexionHilos();
         conexionHilos.start();
     }

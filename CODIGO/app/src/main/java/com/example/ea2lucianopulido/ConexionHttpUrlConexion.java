@@ -36,6 +36,7 @@ public class ConexionHttpUrlConexion {
     private static boolean estadoConexionInternet;
     private static String activity;
 
+
     public ConexionHttpUrlConexion(String url, JSONObject paquete, String headerJsonTipo, String headerJsonDescripcion) {
         this.paquete = paquete;
         this.url = url;
@@ -137,7 +138,6 @@ public class ConexionHttpUrlConexion {
 
         }
         leer.close();
-        System.out.println(sb.toString());
         paqueteRecibido = new JSONObject(sb.toString());
     }
 

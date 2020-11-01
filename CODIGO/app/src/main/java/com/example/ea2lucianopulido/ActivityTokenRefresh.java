@@ -49,6 +49,7 @@ public class ActivityTokenRefresh extends AppCompatActivity {
     private static final int SINCONEXIONINTERNET = 100;
     private String nombreActivity;
     private ArrayList<String> eventosSensor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);// hago que la activity solo se muestre verticalmente cuando se gira el celular horizontal para no tener que reacomodar la interfaz grafica
@@ -61,7 +62,6 @@ public class ActivityTokenRefresh extends AppCompatActivity {
 
         eventosSensor = new ArrayList<String>();
         eventosSensor.addAll(datosRecibidos.getStringArrayList("eventosSensor"));
-
 
 
         Log.i("Eject","Eject onCreate ActivityTokenRefresh");
