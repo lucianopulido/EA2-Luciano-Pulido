@@ -106,8 +106,6 @@ public class ActivitySensores extends AppCompatActivity implements SensorEventLi
         sensorProximidad = administradorSensores.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         paqueteEvento = new JSONObject();
         comunicadorHilos = manejadorMensajesHiloPrincipal();
-
-
     }
 
     private View.OnClickListener botonesListeners = new View.OnClickListener()
